@@ -18,7 +18,8 @@ class TFASession(SQLiteSession):
         if not isinstance(session_path, Path):
             raise TypeError('session_path argument must be only a Path object!')
 
-        session_path = Path(f"{session_path}.session")
+        if not str(session_path).endswith('.session'):
+            session_path = Path(f"{session_path}.session")
 
         if session_path.exists() and session_params:
             raise FileExistsError(f"Session already exist, but you try create new!")
