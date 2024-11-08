@@ -9,6 +9,10 @@ from .tfa_session import TFASession, TFASessionParameters
 
 
 class TFAClient(TelegramClient):
+
+    session: TFASession
+    _proxy: typing.Optional[str]
+
     def __init__(self, session: 'typing.Union[Path, TFASession]', *,
                  connection: 'typing.Type[Connection]' = ConnectionTcpFull,
                  use_ipv6: bool = False,
@@ -61,6 +65,11 @@ class TFAClient(TelegramClient):
             catch_up=catch_up,
             entity_cache_limit=entity_cache_limit
         )
+
+    @property
+    def proxy(self) -> typing.Optional[str]:
+        return self._proxy
+
     @classmethod
     def create_from(cls, session_path: Path, session_params: TFASessionParameters) -> 'TFAClient':
         return cls(TFASession(session_path, session_params))
