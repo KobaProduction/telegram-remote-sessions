@@ -8,7 +8,7 @@ from telegram import TFAFrontendClient
 
 
 async def main():
-    url = "http://127.0.0.1:8000/api/client/send_raw_request"
+    url = "http://127.0.0.1:8000/api/client/send_pickle_request"
     async with ClientSession() as session:
 
         client = TFAFrontendClient(url=url, session=session)

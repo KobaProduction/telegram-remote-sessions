@@ -1,11 +1,10 @@
 import typing
 from aiohttp import ClientSession
+from pickle import dumps as pickle_dump, loads as pickle_loads
 
 from telethon.client import AccountMethods, AuthMethods, DownloadMethods, DialogMethods, ChatMethods, UpdateMethods, \
     ButtonMethods, UploadMethods, MessageMethods, BotMethods, MessageParseMethods, UserMethods
 from telethon._updates import EntityCache as MbEntityCache
-
-from .utils import convert_from_pre_json, convert_objects_from_dict, convert_to_pre_json
 
 
 class TFAFrontendClient(AccountMethods, AuthMethods, DownloadMethods, DialogMethods, ChatMethods,
@@ -22,14 +21,14 @@ class TFAFrontendClient(AccountMethods, AuthMethods, DownloadMethods, DialogMeth
         self._mb_entity_cache = MbEntityCache()
 
     async def __call__(self, request, ordered = False, flood_sleep_threshold = None):
-        data = request.to_dict()
-        cleaned = convert_to_pre_json(data)
-        async with self._session.post(self._url, params={"ordered": str(ordered)}, json=cleaned) as response:
-            result = await response.json()
+        dump = pickle_dump(request)
+        headers = {"content-type": "application/python-pickle"}
+        async with self._session.post(self._url, headers=headers, data=dump) as response:
             if response.status == 200:
-                data = convert_from_pre_json(result.get("raw", None))
-                return convert_objects_from_dict(data)
-            raise Exception(result)
+                data = await response.content.read()
+                return pickle_loads(data)
+            error = await response.json()
+            raise TypeError(error.get("error"))
 
     async def _call(self, sender, request, ordered=False, flood_sleep_threshold=None):
         print(sender, request, ordered, flood_sleep_threshold)
