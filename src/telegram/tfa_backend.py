@@ -8,7 +8,7 @@ from telethon.network import Connection, ConnectionTcpFull
 from .tfa_session import TFASession, TFASessionParameters
 
 
-class TFAClient(TelegramClient):
+class TFABackendClient(TelegramClient):
 
     session: TFASession
     _proxy: typing.Optional[str]
@@ -71,5 +71,5 @@ class TFAClient(TelegramClient):
         return self._proxy
 
     @classmethod
-    def create_from(cls, session_path: Path, session_params: TFASessionParameters) -> 'TFAClient':
+    def create_from(cls, session_path: Path, session_params: TFASessionParameters) -> 'TFABackendClient':
         return cls(TFASession(session_path, session_params))
