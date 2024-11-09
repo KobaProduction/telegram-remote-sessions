@@ -5,7 +5,7 @@ from fastapi import Depends, APIRouter, Request, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
-from loader import get_session_manager
+from context import context
 from telegram import TFAManager, TFASessionParameters
 from telegram.errors import TFAException
 
@@ -34,12 +34,12 @@ async def sessions_exception_handler(request: Request, exc: TFAException):
     )
 
 @router.get("/get")
-async def read_sessions(manager: TFAManager = Depends(get_session_manager)):
+async def read_sessions(manager: TFAManager = Depends(context.get_session_manager)):
     return SessionList(sessions=manager.get_available_sessions_names())
 
 
 @router.get("/get/{name}")
-def read_session(name: str, manager: TFAManager = Depends(get_session_manager)):
+def read_session(name: str, manager: TFAManager = Depends(context.get_session_manager)):
     client = manager.get_client(name)
     return FullSessionDataData(
         session_name=name,
@@ -49,6 +49,6 @@ def read_session(name: str, manager: TFAManager = Depends(get_session_manager)):
     )
 
 @router.get("/get_proxy/{name}")
-def get_proxy(name: str, manager: TFAManager = Depends(get_session_manager)):
+def get_proxy(name: str, manager: TFAManager = Depends(context.get_session_manager)):
     client = manager.get_client(name)
     return SessionProxyData(session_name=name, proxy=client.proxy)
