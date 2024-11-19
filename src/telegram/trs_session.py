@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from telethon.sessions import SQLiteSession
 
 
-class TFASessionParameters(BaseModel):
+class TelegramRemoteSessionParameters(BaseModel):
     api_id: int
     api_hash: str
     device_model: str
@@ -13,8 +13,8 @@ class TFASessionParameters(BaseModel):
     system_lang_code: str
 
 
-class TFASession(SQLiteSession):
-    def __init__(self, session_path: Path, session_params: TFASessionParameters = None):
+class TelegramRemoteSQLiteSession(SQLiteSession):
+    def __init__(self, session_path: Path, session_params: TelegramRemoteSessionParameters = None):
         if not isinstance(session_path, Path):
             raise TypeError('session_path argument must be only a Path object!')
 
@@ -24,7 +24,7 @@ class TFASession(SQLiteSession):
         if session_path.exists() and session_params:
             raise FileExistsError(f"Session already exist, but you try create new!")
 
-        if not session_path.exists() and not isinstance(session_params, TFASessionParameters):
+        if not session_path.exists() and not isinstance(session_params, TelegramRemoteSessionParameters):
             raise FileNotFoundError(
                 f"Session with path does not exist and session_params is not TFASessionParameters type!"
             )
@@ -39,7 +39,7 @@ class TFASession(SQLiteSession):
         c.execute("select name from sqlite_master where type='table' and name='session_parameters'")
         if c.fetchone():
             c.execute(f"select {','.join(keys)} from session_parameters")
-            self.__session_params = TFASessionParameters.model_validate(dict(zip(keys, c.fetchone())))
+            self.__session_params = TelegramRemoteSessionParameters.model_validate(dict(zip(keys, c.fetchone())))
             c.close()
             self.save()
         else:
@@ -61,5 +61,5 @@ class TFASession(SQLiteSession):
             self.save()
 
     @property
-    def session_params(self) -> TFASessionParameters:
+    def session_params(self) -> TelegramRemoteSessionParameters:
         return self.__session_params

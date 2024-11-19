@@ -4,14 +4,13 @@ from aiohttp import ClientSession
 from telethon.tl.functions.messages import RequestAppWebViewRequest
 from telethon.tl.types import InputBotAppShortName, InputUser
 
-from telegram import TFAFrontendClient
+from telegram import TRSFrontendClient
 
 
 async def main():
     url = "http://127.0.0.1:8000/api/client/send_pickle_request"
     async with ClientSession() as session:
-
-        client = TFAFrontendClient(url=url, session=session)
+        client = TRSFrontendClient(url=url, session=session)
         peer = await client.get_entity("BlumCryptoBot")
         data = await client(RequestAppWebViewRequest(
             peer=peer,
@@ -28,4 +27,3 @@ if __name__ == '__main__':
         run(main())
     except SystemExit:
         pass
-

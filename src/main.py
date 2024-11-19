@@ -1,11 +1,11 @@
 from asyncio import run
 
 from configs import SESSIONS_PATH
-from telegram import TFABackendClient, TFAManager
+from telegram import TRSBackendClient, TRSManager
 
 
 async def main():
-    manager = TFAManager(SESSIONS_PATH)
+    manager = TRSManager(SESSIONS_PATH)
     client = manager.get_client("test")
     async with client:
         me = await client.get_me()

@@ -1,16 +1,17 @@
-from telegram import TFAManager, TFABackendClient
+from telegram import TRSManager, TRSBackendClient
 
 from configs import SESSIONS_PATH
 
 
 class Context:
     def __init__(self):
-        self.session_manager = TFAManager(SESSIONS_PATH)
+        self.session_manager = TRSManager(SESSIONS_PATH)
 
-    def get_session_manager(self) -> TFAManager:
+    def get_session_manager(self) -> TRSManager:
         return self.session_manager
 
-    def get_client(self, session_name: str = "test") -> TFABackendClient:
+    def get_client(self, session_name: str = "test") -> TRSBackendClient:
         return self.session_manager.get_client(session_name)
+
 
 context = Context()

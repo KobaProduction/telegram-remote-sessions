@@ -4,12 +4,14 @@ from pickle import dumps as pickle_dump, loads as pickle_loads
 
 from telethon.client import AccountMethods, AuthMethods, DownloadMethods, DialogMethods, ChatMethods, UpdateMethods, \
     ButtonMethods, UploadMethods, MessageMethods, BotMethods, MessageParseMethods, UserMethods
-from telethon._updates import EntityCache as MbEntityCache
+
+from telethon._updates import EntityCache as MbEntityCache  # todo fix access to a protected member _updates of a module
 
 
-class TFAFrontendClient(AccountMethods, AuthMethods, DownloadMethods, DialogMethods, ChatMethods,
-    BotMethods, MessageMethods, UploadMethods, ButtonMethods, UpdateMethods, MessageParseMethods, UserMethods):
-
+class TRSFrontendClient(
+    AccountMethods, AuthMethods, DownloadMethods, DialogMethods, ChatMethods, BotMethods,
+    MessageMethods, UploadMethods, ButtonMethods, UpdateMethods, MessageParseMethods, UserMethods
+):
     _proxy: typing.Optional[str]
     _session: ClientSession
     _url = str
@@ -20,7 +22,7 @@ class TFAFrontendClient(AccountMethods, AuthMethods, DownloadMethods, DialogMeth
         self._url = url
         self._mb_entity_cache = MbEntityCache()
 
-    async def __call__(self, request, ordered = False, flood_sleep_threshold = None):
+    async def __call__(self, request, ordered=False, flood_sleep_threshold=None):
         dump = pickle_dump(request)
         headers = {"content-type": "application/python-pickle"}
         async with self._session.post(self._url, headers=headers, data=dump) as response:

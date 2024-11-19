@@ -5,15 +5,14 @@ from pathlib import Path
 
 from telethon import TelegramClient
 from telethon.network import Connection, ConnectionTcpFull
-from .tfa_session import TFASession, TFASessionParameters
+from .trs_session import TelegramRemoteSQLiteSession, TelegramRemoteSessionParameters
 
 
-class TFABackendClient(TelegramClient):
-
-    session: TFASession
+class TRSBackendClient(TelegramClient):
+    session: TelegramRemoteSQLiteSession
     _proxy: typing.Optional[str]
 
-    def __init__(self, session: 'typing.Union[Path, TFASession]', *,
+    def __init__(self, session: 'typing.Union[Path, TelegramRemoteSQLiteSession]', *,
                  connection: 'typing.Type[Connection]' = ConnectionTcpFull,
                  use_ipv6: bool = False,
                  proxy: typing.Union[tuple, dict] = None,
@@ -31,13 +30,13 @@ class TFABackendClient(TelegramClient):
                  receive_updates: bool = True,
                  catch_up: bool = False,
                  entity_cache_limit: int = 5000
-         ):
-        if not isinstance(session, (Path, TFASession)):
+                 ):
+        if not isinstance(session, (Path, TelegramRemoteSQLiteSession)):
             raise TypeError(
                 'The given session must be a Path object or a TFAClient (from TelethonFastAPI) instance.'
             )
         if isinstance(session, Path):
-            session = TFASession(session)
+            session = TelegramRemoteSQLiteSession(session)
         super().__init__(
             session,
             api_id=session.session_params.api_id,
@@ -71,5 +70,5 @@ class TFABackendClient(TelegramClient):
         return self._proxy
 
     @classmethod
-    def create_from(cls, session_path: Path, session_params: TFASessionParameters) -> 'TFABackendClient':
-        return cls(TFASession(session_path, session_params))
+    def create_from(cls, session_path: Path, session_params: TelegramRemoteSessionParameters) -> 'TRSBackendClient':
+        return cls(TelegramRemoteSQLiteSession(session_path, session_params))
