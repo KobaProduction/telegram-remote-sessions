@@ -5,14 +5,16 @@ from pathlib import Path
 
 from telethon import TelegramClient
 from telethon.network import Connection, ConnectionTcpFull
-from .trs_session import TelegramRemoteSQLiteSession, TelegramRemoteSessionParameters
+
+from ..sessions import TelegramRemoteSQLiteSession, TelegramRemoteSessionParameters
 
 
 class TRSBackendClient(TelegramClient):
     session: TelegramRemoteSQLiteSession
     _proxy: typing.Optional[str]
 
-    def __init__(self, session: 'typing.Union[Path, TelegramRemoteSQLiteSession]', *,
+    def __init__(self,
+                 session: 'typing.Union[Path, TelegramRemoteSQLiteSession]', *,
                  connection: 'typing.Type[Connection]' = ConnectionTcpFull,
                  use_ipv6: bool = False,
                  proxy: typing.Union[tuple, dict] = None,

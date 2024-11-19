@@ -1,7 +1,8 @@
+import uvicorn
 from fastapi import FastAPI
 
 from api import client_methods_router, session_router, sessions_exception_handler
-from telegram.errors import TelegramRemoteSessionException
+from trs.errors import TelegramRemoteSessionException
 
 app = FastAPI(
     title="Telegram Remote Sessions Server",
@@ -16,3 +17,7 @@ app.exception_handler(TelegramRemoteSessionException)(sessions_exception_handler
 @app.get("/")
 async def read_root():
     return {"Hello": "World"}
+
+
+if __name__ == '__main__':
+    uvicorn.run(app, host='0.0.0.0', port=3000)

@@ -7,7 +7,7 @@ from fastapi.requests import Request
 from starlette.responses import JSONResponse
 
 from context import context
-from telegram import TRSBackendClient, convert_to_pre_json, convert_from_pre_json, convert_objects_from_dict
+from trs import TRSBackendClient, convert_to_pre_json, convert_from_pre_json, convert_objects_from_dict
 
 
 router = APIRouter(prefix="/client", tags=["Client Methods"])

@@ -1,16 +1,7 @@
 from pathlib import Path
-from pydantic import BaseModel
 from telethon.sessions import SQLiteSession
 
-
-class TelegramRemoteSessionParameters(BaseModel):
-    api_id: int
-    api_hash: str
-    device_model: str
-    system_version: str
-    app_version: str
-    lang_code: str
-    system_lang_code: str
+from ._entities import TelegramRemoteSessionParameters
 
 
 class TelegramRemoteSQLiteSession(SQLiteSession):

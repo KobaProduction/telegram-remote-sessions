@@ -4,7 +4,7 @@ from aiohttp import ClientSession
 from telethon.tl.functions.messages import RequestAppWebViewRequest
 from telethon.tl.types import InputBotAppShortName, InputUser
 
-from telegram import TRSFrontendClient
+from trs import TRSFrontendClient
 
 
 async def main():

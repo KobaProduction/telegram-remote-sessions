@@ -1,4 +1,4 @@
-from telegram import TRSManager, TRSBackendClient
+from trs import TRSManager, TRSBackendClient
 
 from configs import SESSIONS_PATH
 

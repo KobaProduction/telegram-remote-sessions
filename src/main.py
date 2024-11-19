@@ -1,7 +1,7 @@
 from asyncio import run
 
 from configs import SESSIONS_PATH
-from telegram import TRSBackendClient, TRSManager
+from trs import TRSBackendClient, TRSManager
 
 
 async def main():

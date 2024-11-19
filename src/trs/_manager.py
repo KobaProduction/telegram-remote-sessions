@@ -1,8 +1,8 @@
 import typing
 from pathlib import Path
 
-from .trs_session import TelegramRemoteSessionParameters
-from .trs_backend import TRSBackendClient
+from .sessions import TelegramRemoteSessionParameters
+from .clients import TRSBackendClient
 from .errors import SessionNotExits
 
 
