@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from context import context
-from trs import TRSManager, TelegramRemoteSessionParameters
+from trs import TRSManager, TRSessionParameters
 from trs.errors import TelegramRemoteSessionException
 
 router = APIRouter(prefix="/sessions", tags=["Sessions"])
@@ -16,7 +16,7 @@ class SessionProxyData(BaseModel):
     proxy: typing.Optional[str]
 
 
-class FullSessionData(SessionProxyData, TelegramRemoteSessionParameters):
+class FullSessionData(SessionProxyData, TRSessionParameters):
     file_path: str
 
 

@@ -1,21 +1,18 @@
 from pathlib import Path
 from telethon.sessions import SQLiteSession
 
-from ._entities import TelegramRemoteSessionParameters
+from ._entities import TRSessionParameters
 
 
-class TelegramRemoteSQLiteSession(SQLiteSession):
-    def __init__(self, session_path: Path, session_params: TelegramRemoteSessionParameters = None):
+class SQLiteTRSession(SQLiteSession):
+    def __init__(self, session_path: Path, session_params: TRSessionParameters = None):
         if not isinstance(session_path, Path):
             raise TypeError('session_path argument must be only a Path object!')
-
-        if not str(session_path).endswith('.session'):
-            session_path = Path(f"{session_path}.session")
 
         if session_path.exists() and session_params:
             raise FileExistsError(f"Session already exist, but you try create new!")
 
-        if not session_path.exists() and not isinstance(session_params, TelegramRemoteSessionParameters):
+        if not session_path.exists() and not isinstance(session_params, TRSessionParameters):
             raise FileNotFoundError(
                 f"Session with path does not exist and session_params is not TFASessionParameters type!"
             )
@@ -30,7 +27,7 @@ class TelegramRemoteSQLiteSession(SQLiteSession):
         c.execute("select name from sqlite_master where type='table' and name='session_parameters'")
         if c.fetchone():
             c.execute(f"select {','.join(keys)} from session_parameters")
-            self.__session_params = TelegramRemoteSessionParameters.model_validate(dict(zip(keys, c.fetchone())))
+            self.__session_params = TRSessionParameters.model_validate(dict(zip(keys, c.fetchone())))
             c.close()
             self.save()
         else:
@@ -46,11 +43,12 @@ class TelegramRemoteSQLiteSession(SQLiteSession):
                     system_lang_code text
                 )"""
             )
-            values = ",".join(map(lambda x: f"'{x}'", dict(self.__session_params).values()))
+            dict_session_params = self.__session_params.model_dump(by_alias=False)
+            values = ",".join({key: f"'{dict_session_params[key]}'" for key in keys}.values())
             c.execute(f"insert into session_parameters values ({values})")
             c.close()
             self.save()
 
     @property
-    def session_params(self) -> TelegramRemoteSessionParameters:
+    def session_params(self) -> TRSessionParameters:
         return self.__session_params

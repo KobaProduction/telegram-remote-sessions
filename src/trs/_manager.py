@@ -1,7 +1,9 @@
 import typing
 from pathlib import Path
 
-from .sessions import TelegramRemoteSessionParameters
+from telethon.sessions.sqlite import EXTENSION
+
+from .sessions import TRSessionParameters
 from .clients import TRSBackendClient
 from .errors import SessionNotExits
 
@@ -14,7 +16,7 @@ class TRSManager:
         self._load_sessions()
 
     def _load_sessions(self):
-        for file in self.sessions_path.glob("*.session"):
+        for file in self.sessions_path.glob(f"*{EXTENSION}"):
             name = ".".join(file.name.split(".")[:-1])
             self._sessions.update({name: TRSBackendClient(file)})
 
@@ -26,8 +28,8 @@ class TRSManager:
             raise SessionNotExits(f"Session with name '{name}' not found")
         return self._sessions[name]
 
-    def create_client(self, name: str, session_params: TelegramRemoteSessionParameters) -> TRSBackendClient:
-        session_path = self.sessions_path.joinpath(f"{name}.session")
+    def create_client(self, name: str, session_params: TRSessionParameters) -> TRSBackendClient:
+        session_path = self.sessions_path.joinpath(f"{name}{EXTENSION}")
         client = TRSBackendClient.create_from(session_path, session_params)
         self._sessions[name] = client
         return client

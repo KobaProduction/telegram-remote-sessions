@@ -1,2 +1,2 @@
-from ._entities import TelegramRemoteSessionParameters
-from ._sqlite import TelegramRemoteSQLiteSession
+from ._entities import TRSessionParameters
+from ._sqlite import SQLiteTRSession
