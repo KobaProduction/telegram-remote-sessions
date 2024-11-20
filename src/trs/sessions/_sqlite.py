@@ -1,7 +1,7 @@
 from pathlib import Path
 from telethon.sessions import SQLiteSession
 
-from ._entities import TRSessionParameters
+from ._entities import TRSessionParameters, TRSessionState
 
 
 class SQLiteTRSession(SQLiteSession):
@@ -19,15 +19,21 @@ class SQLiteTRSession(SQLiteSession):
 
         super().__init__(str(session_path))
         self.__session_params = session_params
+        self._is_active = True
+        self._state: TRSessionState = TRSessionState.NOT_AUTHENTICATED
         self._write_session_params()
 
-    def _write_session_params(self, ) -> None:
+    def _write_session_params(self) -> None:
         keys = ("api_id", "api_hash", "device_model", "system_version", "app_version", "lang_code", "system_lang_code")
         c = self._cursor()
         c.execute("select name from sqlite_master where type='table' and name='session_parameters'")
         if c.fetchone():
             c.execute(f"select {','.join(keys)} from session_parameters")
             self.__session_params = TRSessionParameters.model_validate(dict(zip(keys, c.fetchone())))
+            c.execute(f"select state, is_active from session_parameters")
+            state, is_active = c.fetchone()
+            self._is_active = bool(is_active)
+            self._state = TRSessionState(state)
             c.close()
             self.save()
         else:
@@ -40,14 +46,48 @@ class SQLiteTRSession(SQLiteSession):
                     system_version text,
                     app_version text,
                     lang_code text,
-                    system_lang_code text
+                    system_lang_code text,
+                    state integer,
+                    is_active boolean
                 )"""
             )
             dict_session_params = self.__session_params.model_dump(by_alias=False)
             values = ",".join({key: f"'{dict_session_params[key]}'" for key in keys}.values())
-            c.execute(f"insert into session_parameters values ({values})")
+            c.execute(f"insert into session_parameters values ({values},'0','1')")
             c.close()
             self.save()
+
+    def _set_session_parameter(self, parameter: str, value: str):
+        c = self._cursor()
+        c.execute(f"update session_parameters set {parameter}={value};")
+        c.close()
+        self.save()
+
+    @property
+    def state(self) -> TRSessionState:
+        return self._state
+
+    def set_state(self, state: TRSessionState):
+        if not isinstance(state, TRSessionState):
+            raise TypeError('state argument must be only a SessionState object!')
+        self._set_session_parameter(parameter="state", value=str(state.value))
+        self._state = state
+
+    @property
+    def active(self) -> bool:
+        return self._is_active
+
+    def activate(self):
+        if self._is_active:
+            return
+        self._set_session_parameter(parameter="is_active", value="1")
+        self._is_active = True
+
+    def deactivate(self):
+        if not self._is_active:
+            return
+        self._set_session_parameter(parameter="is_active", value="0")
+        self._is_active = False
 
     @property
     def session_params(self) -> TRSessionParameters:

@@ -3,10 +3,10 @@ from asyncio import AbstractEventLoop
 from logging import Logger
 from pathlib import Path
 
-from telethon import TelegramClient
+from telethon import TelegramClient, types
 from telethon.network import Connection, ConnectionTcpFull
 
-from ..sessions import SQLiteTRSession, TRSessionParameters
+from ..sessions import SQLiteTRSession, TRSessionParameters, TRSessionState
 
 
 class TRSBackendClient(TelegramClient):
@@ -66,6 +66,17 @@ class TRSBackendClient(TelegramClient):
             catch_up=catch_up,
             entity_cache_limit=entity_cache_limit
         )
+
+    async def get_me(self: 'TelegramClient', input_peer: bool = False) \
+            -> 'typing.Union[types.User, types.InputPeerUser]':
+        me = await super().get_me(input_peer=input_peer)
+        if me is not None:
+            self.session.set_state(TRSessionState.AUTHENTICATED)
+        elif self.session.state == TRSessionState.AUTHENTICATED:
+            self.session.set_state(TRSessionState.BROKEN)
+        elif self.session.state != TRSessionState.BROKEN:
+            self.session.set_state(TRSessionState.NOT_AUTHENTICATED)
+        return me
 
     @property
     def proxy(self) -> typing.Optional[str]:
