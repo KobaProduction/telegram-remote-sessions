@@ -1,4 +1,7 @@
+import typing
 from pathlib import Path
+
+from better_proxy import Proxy
 from telethon.sessions import SQLiteSession
 
 from ._entities import TRSessionParameters, TRSessionState
@@ -7,19 +10,20 @@ from ._entities import TRSessionParameters, TRSessionState
 class SQLiteTRSession(SQLiteSession):
     def __init__(self, session_path: Path, session_params: TRSessionParameters = None):
         if not isinstance(session_path, Path):
-            raise TypeError('session_path argument must be only a Path object!')
+            raise TypeError("session_path argument must be only a 'Path' object!")
 
         if session_path.exists() and session_params:
             raise FileExistsError(f"Session already exist, but you try create new!")
 
         if not session_path.exists() and not isinstance(session_params, TRSessionParameters):
             raise FileNotFoundError(
-                f"Session with path does not exist and session_params is not TFASessionParameters type!"
+                f"Session with path does not exist and session_params is not 'TFASessionParameters' type!"
             )
 
         super().__init__(str(session_path))
         self.__session_params = session_params
         self._is_active = True
+        self._proxy = None
         self._state: TRSessionState = TRSessionState.NOT_AUTHENTICATED
         self._write_session_params()
 
@@ -30,10 +34,11 @@ class SQLiteTRSession(SQLiteSession):
         if c.fetchone():
             c.execute(f"select {','.join(keys)} from session_parameters")
             self.__session_params = TRSessionParameters.model_validate(dict(zip(keys, c.fetchone())))
-            c.execute(f"select state, is_active from session_parameters")
-            state, is_active = c.fetchone()
+            c.execute(f"select state, is_active, proxy from session_parameters")
+            state, is_active, proxy = c.fetchone()
             self._is_active = bool(is_active)
             self._state = TRSessionState(state)
+            self._proxy = None if not proxy else proxy
             c.close()
             self.save()
         else:
@@ -48,12 +53,13 @@ class SQLiteTRSession(SQLiteSession):
                     lang_code text,
                     system_lang_code text,
                     state integer,
-                    is_active boolean
+                    is_active boolean,
+                    proxy text default ""
                 )"""
             )
             dict_session_params = self.__session_params.model_dump(by_alias=False)
             values = ",".join({key: f"'{dict_session_params[key]}'" for key in keys}.values())
-            c.execute(f"insert into session_parameters values ({values},'0','1')")
+            c.execute(f"insert into session_parameters values ({values}, '0', '1', '')")
             c.close()
             self.save()
 
@@ -64,12 +70,28 @@ class SQLiteTRSession(SQLiteSession):
         self.save()
 
     @property
+    def proxy(self) -> typing.Optional[str]:
+        return self._proxy
+
+    def set_proxy(self, proxy: typing.Union[None, str, Proxy] = None):
+        if not (proxy is None or isinstance(proxy, str) or isinstance(proxy, Proxy)):
+            raise ValueError("proxy must be a 'None', 'str' or a 'Proxy' types")
+        if isinstance(proxy, str):
+            proxy = Proxy.from_str(proxy)
+        if isinstance(proxy, Proxy):
+            proxy = proxy.as_url
+        if proxy is None:
+            proxy = ""
+        self._set_session_parameter(parameter="proxy", value=f"'{proxy}'")
+        self._proxy = proxy
+
+    @property
     def state(self) -> TRSessionState:
         return self._state
 
     def set_state(self, state: TRSessionState):
         if not isinstance(state, TRSessionState):
-            raise TypeError('state argument must be only a SessionState object!')
+            raise TypeError("state argument must be only a 'SessionState' object!")
         self._set_session_parameter(parameter="state", value=str(state.value))
         self._state = state
 

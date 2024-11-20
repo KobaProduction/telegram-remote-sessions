@@ -3,6 +3,7 @@ from asyncio import AbstractEventLoop
 from logging import Logger
 from pathlib import Path
 
+from better_proxy import Proxy
 from telethon import TelegramClient, types
 from telethon.network import Connection, ConnectionTcpFull
 
@@ -11,13 +12,12 @@ from ..sessions import SQLiteTRSession, TRSessionParameters, TRSessionState
 
 class TRSBackendClient(TelegramClient):
     session: SQLiteTRSession
-    _proxy: typing.Optional[str]
 
     def __init__(self,
                  session: 'typing.Union[Path, SQLiteTRSession]', *,
                  connection: 'typing.Type[Connection]' = ConnectionTcpFull,
                  use_ipv6: bool = False,
-                 proxy: typing.Union[tuple, dict] = None,
+                 proxy: typing.Union[None, str, Proxy] = None,
                  local_addr: typing.Union[str, tuple] = None,
                  timeout: int = 10,
                  request_retries: int = 5,
@@ -50,7 +50,7 @@ class TRSBackendClient(TelegramClient):
             system_lang_code=session.session_params.system_lang_code,
             connection=connection,
             use_ipv6=use_ipv6,
-            proxy=proxy,
+            proxy=None,
             local_addr=local_addr,
             timeout=timeout,
             request_retries=request_retries,
@@ -66,6 +66,24 @@ class TRSBackendClient(TelegramClient):
             catch_up=catch_up,
             entity_cache_limit=entity_cache_limit
         )
+        if proxy:
+            self.set_proxy(proxy)
+        elif session.proxy:
+            self.set_proxy(session.proxy)
+
+    def set_proxy(self, proxy: typing.Union[str, Proxy]) -> None:
+        if isinstance(proxy, str):
+            proxy = Proxy.from_str(proxy)
+        if not isinstance(proxy, Proxy):
+            raise TypeError("Proxy must be of type 'str' or 'Proxy'")
+        proxy_dict = dict(
+            proxy_type=proxy.protocol,
+            addr=proxy.host,
+            port=proxy.port,
+            username=proxy.login,
+            password=proxy.password
+        )
+        super().set_proxy(proxy_dict)
 
     async def get_me(self: 'TelegramClient', input_peer: bool = False) \
             -> 'typing.Union[types.User, types.InputPeerUser]':
@@ -78,9 +96,9 @@ class TRSBackendClient(TelegramClient):
             self.session.set_state(TRSessionState.NOT_AUTHENTICATED)
         return me
 
-    @property
-    def proxy(self) -> typing.Optional[str]:
-        return self._proxy
+    async def _on_login(self, user):
+        self.session.set_state(TRSessionState.AUTHENTICATED)
+        return await super()._on_login(user)
 
     @classmethod
     def create_from(cls, session_path: Path, session_params: TRSessionParameters) -> 'TRSBackendClient':
