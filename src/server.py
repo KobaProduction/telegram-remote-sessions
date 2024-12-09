@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 
 from api import api_router
+from configs import SERVER_PORT, SERVER_HOST
 
 app = FastAPI(
     title="Telegram Remote Sessions Server",
@@ -18,4 +19,4 @@ async def read_root():
 
 
 if __name__ == '__main__':
-    uvicorn.run(app, host='0.0.0.0', port=3000)
+    uvicorn.run(app, host=SERVER_HOST, port=SERVER_PORT)

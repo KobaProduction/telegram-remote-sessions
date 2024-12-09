@@ -5,13 +5,13 @@ from aiohttp import ClientSession
 from telethon.tl.functions.messages import RequestAppWebViewRequest
 from telethon.tl.types import InputBotAppShortName, InputUser
 
-from configs import SESSIONS_PATH
+from configs import SESSIONS_PATH, SERVER_PORT, SERVER_HOST
 from trs import TRSFrontendClient, TRSManager, TRSessionParameters, TRSBackendClient
 from trs.sessions import TRSessionState
 
 
 async def main():
-    url = "http://127.0.0.1:8000/api/client/send_pickle_request"
+    url = f"http://{SERVER_HOST}:{SERVER_PORT}/api/v1/client/send_pickle_request"
     async with ClientSession() as session:
         client = TRSFrontendClient(url=url, session=session)
         peer = await client.get_entity("BlumCryptoBot")
@@ -66,6 +66,6 @@ async def create_session():
 
 if __name__ == '__main__':
     try:
-        run(create_session())
+        run(main())
     except SystemExit:
         pass
