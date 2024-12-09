@@ -43,3 +43,9 @@ class TRSManager:
         client = TRSBackendClient.create_from(session_path, session_params)
         self._sessions[name] = client
         return client
+
+    async def remove_client(self, name: str):
+        client = await self.get_client(name)
+        await client.disconnect()
+        self._sessions.pop(name)
+        client.session.delete()

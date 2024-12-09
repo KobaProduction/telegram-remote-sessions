@@ -6,7 +6,7 @@ from context import context
 from trs import TRSManager, TRSessionParameters
 from trs.sessions import TRSessionState
 
-from .entities import SessionList, FullSessionInfo
+from .entities import SessionList, FullSessionInfo, SessionResponseStatus
 from .error_handler_route import RouteWithErrorHandling
 
 router = APIRouter(prefix="/sessions", route_class=RouteWithErrorHandling)
@@ -40,3 +40,10 @@ async def create_new_session(name: str, session_parameters: TRSessionParameters,
                              manager: TRSManager = Depends(context.get_session_manager)) -> FullSessionInfo:
     await manager.create_client(name=name, session_params=session_parameters)
     return await get_session(name=name, manager=manager)
+
+
+@router.delete("/remove")
+async def remove_exist_session(name: str,
+                               manager: TRSManager = Depends(context.get_session_manager)) -> SessionResponseStatus:
+    await manager.remove_client(name=name)
+    return SessionResponseStatus(status=True, message="Session successful removed!")
