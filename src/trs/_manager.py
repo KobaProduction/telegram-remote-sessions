@@ -20,10 +20,10 @@ class TRSManager:
             name = ".".join(file.name.split(".")[:-1])
             self._sessions.update({name: TRSBackendClient(file)})
 
-    def get_sessions(self,
-                     active: bool | None = None,
-                     state: TRSessionState | None = None,
-                     full: bool | None = None) -> typing.List[str] | typing.List[str]:
+    async def get_clients(self,
+                          active: bool | None = None,
+                          state: TRSessionState | None = None,
+                          ) -> typing.List[str] | typing.List[str]:
         sessions_names = []
         for session_name, client in self._sessions.items():
             if active is not None and client.session.active != active:
@@ -33,12 +33,12 @@ class TRSManager:
             sessions_names.append(session_name)
         return sessions_names
 
-    def get_client(self, name: str) -> TRSBackendClient:
+    async def get_client(self, name: str) -> TRSBackendClient:
         if name not in self._sessions:
             raise SessionNotExits(f"Session with name '{name}' not found")
         return self._sessions[name]
 
-    def create_client(self, name: str, session_params: TRSessionParameters) -> TRSBackendClient:
+    async def create_client(self, name: str, session_params: TRSessionParameters) -> TRSBackendClient:
         session_path = self.sessions_path.joinpath(f"{name}{EXTENSION}")
         client = TRSBackendClient.create_from(session_path, session_params)
         self._sessions[name] = client

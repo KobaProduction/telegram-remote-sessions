@@ -17,14 +17,14 @@ states = ", ".join(f"{x[0]} - {x[1]}" for x in session_states)
 
 @router.get("/get")
 async def get_sessions(active: bool | None = Query(None, description="Account active state"),
-                        state: TRSessionState | None = Query(None, description=states),
-                        manager: TRSManager = Depends(context.get_session_manager)) -> SessionList:
-    return SessionList(sessions=manager.get_sessions(active=active, state=state))
+                       state: TRSessionState | None = Query(None, description=states),
+                       manager: TRSManager = Depends(context.get_session_manager)) -> SessionList:
+    return SessionList(sessions=await manager.get_clients(active=active, state=state))
 
 
 @router.get("/get/{name}")
-def get_session(name: str, manager: TRSManager = Depends(context.get_session_manager)) -> FullSessionInfo:
-    client = manager.get_client(name)
+async def get_session(name: str, manager: TRSManager = Depends(context.get_session_manager)) -> FullSessionInfo:
+    client = await manager.get_client(name)
     return FullSessionInfo(
         name=name,
         is_active=client.session.active,

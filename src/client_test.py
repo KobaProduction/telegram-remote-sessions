@@ -41,9 +41,9 @@ async def create_session():
     manager = TRSManager(sessions_path=SESSIONS_PATH)
     client: TRSBackendClient
     try:
-        client = manager.create_client(name=client_name, session_params=session_params)
+        client = await manager.create_client(name=client_name, session_params=session_params)
     except FileExistsError:
-        client = manager.get_client(name=client_name)
+        client = await manager.get_client(name=client_name)
 
 
     # client.set_proxy("socks5://127.0.0.1:2080")
