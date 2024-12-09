@@ -3,7 +3,7 @@ from inspect import getmembers
 from fastapi import APIRouter, Depends, Query
 
 from context import context
-from trs import TRSManager
+from trs import TRSManager, TRSessionParameters
 from trs.sessions import TRSessionState
 
 from .entities import SessionList, FullSessionInfo
@@ -33,3 +33,10 @@ async def get_session(name: str, manager: TRSManager = Depends(context.get_sessi
         session_parameters=client.session.session_params,
         proxy=client.session.proxy
     )
+
+
+@router.post("/new")
+async def create_new_session(name: str, session_parameters: TRSessionParameters,
+                             manager: TRSManager = Depends(context.get_session_manager)) -> FullSessionInfo:
+    await manager.create_client(name=name, session_params=session_parameters)
+    return await get_session(name=name, manager=manager)
