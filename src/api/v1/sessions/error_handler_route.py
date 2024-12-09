@@ -2,9 +2,10 @@ from typing import Callable
 
 from fastapi import Request, status
 from fastapi.responses import Response, JSONResponse
-from fastapi.routing import APIRoute, APIRouter
+from fastapi.routing import APIRoute
 
 from trs.errors import TelegramRemoteSessionException
+from .entities import SessionResponseStatus
 
 
 class RouteWithErrorHandling(APIRoute):
@@ -22,6 +23,9 @@ class RouteWithErrorHandling(APIRoute):
                     exc_message = exc.message
                 return JSONResponse(
                     status_code=status_code,
-                    content={"error": f"{type(exc).__name__}: {exc_message}."},
+                    content=SessionResponseStatus(
+                        status=False,
+                        message=f"Error - {type(exc).__name__}: {exc_message}.",
+                    ).model_dump()
                 )
         return custom_route_handler

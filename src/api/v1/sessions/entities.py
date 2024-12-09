@@ -1,6 +1,5 @@
 import typing
 
-from better_proxy import Proxy
 from pydantic import BaseModel
 
 from trs import TRSessionParameters
@@ -20,3 +19,7 @@ class FullSessionInfo(SessionName):
 
 class SessionList(BaseModel):
     sessions: typing.List[str]
+
+class SessionResponseStatus(BaseModel):
+    status: bool
+    message: str
