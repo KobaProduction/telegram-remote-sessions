@@ -1,8 +1,8 @@
-from enum import Enum
+from enum import IntEnum
 from pydantic import BaseModel
 
 
-class TRSessionState(Enum):
+class TRSessionState(IntEnum):
     NOT_AUTHENTICATED = 0
     AUTHENTICATED = 1
     BROKEN = 2

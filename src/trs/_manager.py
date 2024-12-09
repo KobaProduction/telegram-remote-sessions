@@ -3,7 +3,7 @@ from pathlib import Path
 
 from telethon.sessions.sqlite import EXTENSION
 
-from .sessions import TRSessionParameters
+from .sessions import TRSessionParameters, TRSessionState
 from .clients import TRSBackendClient
 from .errors import SessionNotExits
 
@@ -20,8 +20,18 @@ class TRSManager:
             name = ".".join(file.name.split(".")[:-1])
             self._sessions.update({name: TRSBackendClient(file)})
 
-    def get_available_sessions_names(self) -> typing.List[str]:
-        return [*self._sessions.keys()]
+    def get_sessions(self,
+                     active: bool | None = None,
+                     state: TRSessionState | None = None,
+                     full: bool | None = None) -> typing.List[str] | typing.List[str]:
+        sessions_names = []
+        for session_name, client in self._sessions.items():
+            if active is not None and client.session.active != active:
+                continue
+            if state is not None and client.session.state != state:
+                continue
+            sessions_names.append(session_name)
+        return sessions_names
 
     def get_client(self, name: str) -> TRSBackendClient:
         if name not in self._sessions:

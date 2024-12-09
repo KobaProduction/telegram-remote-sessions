@@ -1,0 +1,22 @@
+import typing
+
+from better_proxy import Proxy
+from pydantic import BaseModel
+
+from trs import TRSessionParameters
+
+
+class SessionName(BaseModel):
+    name: str
+
+class FullSessionInfo(SessionName):
+    is_active: bool
+    is_authenticated: bool
+    is_broken: bool
+    proxy: str | None
+    session_parameters: TRSessionParameters
+
+
+
+class SessionList(BaseModel):
+    sessions: typing.List[str]
