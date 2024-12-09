@@ -1,5 +1,5 @@
 from enum import IntEnum
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class TRSessionState(IntEnum):
@@ -20,5 +20,5 @@ class TRSApplicationParameters(BaseModel):
 
 
 class TRSessionParameters(TRSDeviceParameters, TRSApplicationParameters):
-    api_id: int
+    api_id: int = Field(ge=1)
     api_hash: str
