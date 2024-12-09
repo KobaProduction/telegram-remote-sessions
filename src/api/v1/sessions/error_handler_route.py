@@ -16,10 +16,12 @@ class RouteWithErrorHandling(APIRoute):
                 return await original_route_handler(request)
             except Exception as exc:
                 status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+                exc_message = str(exc)
                 if isinstance(exc, TelegramRemoteSessionException) and type(exc).__name__ == "SessionNotExits":
                     status_code = status.HTTP_400_BAD_REQUEST
+                    exc_message = exc.message
                 return JSONResponse(
                     status_code=status_code,
-                    content={"error": f"{type(exc).__name__}: {exc.message}."},
+                    content={"error": f"{type(exc).__name__}: {exc_message}."},
                 )
         return custom_route_handler
