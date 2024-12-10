@@ -11,7 +11,7 @@ from trs.sessions import TRSessionState
 
 
 async def main():
-    url = f"http://{SERVER_HOST}:{SERVER_PORT}/api/v1/client/send_pickle_request"
+    url = f"http://{SERVER_HOST}:{SERVER_PORT}/api/v1/trs/client/send_pickle_request"
     async with ClientSession() as session:
         client = TRSFrontendClient(url=url, session=session)
         peer = await client.get_entity("BlumCryptoBot")

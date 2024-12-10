@@ -10,7 +10,7 @@ from telethon.errors import RPCError
 from context import context
 from trs import TRSBackendClient, convert_to_pre_json, convert_from_pre_json, convert_objects_from_dict
 
-router = APIRouter(prefix="/client")
+router = APIRouter(prefix="/trs/client", tags=["TRS Client methods"])
 
 
 @router.post("/send_pickle_request")
@@ -41,10 +41,3 @@ async def send_request(body: dict, ordered: bool = False, client: TRSBackendClie
         result = await client(request, ordered=ordered)
         data = convert_to_pre_json({"raw": result})
         return Response(dumps(data), media_type="application/json")
-
-
-@router.get("/get_me")
-async def get_me(client: TRSBackendClient = Depends(context.get_client)):
-    async with client:
-        me = await client.get_me()
-        return Response(me.to_json(), media_type="application/json")

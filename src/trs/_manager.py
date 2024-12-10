@@ -44,7 +44,7 @@ class TRSManager:
         self._sessions[name] = client
         return client
 
-    async def remove_client(self, name: str):
+    async def delete_client(self, name: str):
         client = await self.get_client(name)
         await client.disconnect()
         self._sessions.pop(name)
