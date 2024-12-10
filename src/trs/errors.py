@@ -5,3 +5,9 @@ class TelegramRemoteSessionException(Exception):
 
 class SessionNotExits(TelegramRemoteSessionException):
     pass
+
+class TRSBackendError(TelegramRemoteSessionException):
+    pass
+
+class BackendSessionNotAuthed(TRSBackendError):
+    pass
