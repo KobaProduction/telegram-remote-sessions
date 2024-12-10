@@ -6,7 +6,7 @@ from context import context
 from trs import TRSManager, TRSessionParameters
 from trs.sessions import TRSessionState
 
-from .entities import SessionList, FullSessionInfo, SessionResponseStatus
+from .entities import SessionList, FullSessionInfo, SessionResponseStatus, SessionAuthCodeHash, SessionAuthUser
 from .error_handler_route import RouteWithErrorHandling
 
 router = APIRouter(route_class=RouteWithErrorHandling, tags=["Sessions Methods"])
@@ -64,3 +64,26 @@ async def update_exist_session(name: str,
     if proxy:
         client.set_proxy(proxy)
     return await read_session(name=name, manager=manager)
+
+@router.get("/session/send_auth_code")
+async def send_auth_code(name: str,
+                         phone: str,
+                         manager: TRSManager = Depends(context.get_session_manager)) -> SessionAuthCodeHash:
+    client = await manager.get_client(name)
+    if not client.is_connected():
+        await client.connect()
+    result = await client.send_code_request(phone=phone)
+    return SessionAuthCodeHash(phone=phone, hash=result.phone_code_hash)
+
+@router.get("/session/auth")
+async def confirm_auth(name: str,
+                         phone: str,
+                         code: str,
+                         password: str | None = None,
+                         phone_code_hash: str | None = None,
+                         manager: TRSManager = Depends(context.get_session_manager)) -> SessionAuthUser:
+    client = await manager.get_client(name)
+    if not client.is_connected():
+        await client.connect()
+    user = await client.sign_in(phone=phone, code=code, password=password, phone_code_hash=phone_code_hash)
+    return SessionAuthUser(id=user.id, first_name=user.first_name, last_name=user.last_name, username=user.username)

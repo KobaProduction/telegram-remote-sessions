@@ -1,5 +1,6 @@
 import typing
 
+from better_proxy import Proxy
 from pydantic import BaseModel
 
 from trs import TRSessionParameters
@@ -23,3 +24,13 @@ class SessionList(BaseModel):
 class SessionResponseStatus(BaseModel):
     status: bool
     message: str
+
+class SessionAuthCodeHash(BaseModel):
+    phone: str
+    hash: str
+
+class SessionAuthUser(BaseModel):
+    id: int
+    username: str
+    first_name: str
+    last_name: str
