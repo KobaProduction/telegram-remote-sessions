@@ -47,3 +47,20 @@ async def remove_exist_session(name: str,
                                manager: TRSManager = Depends(context.get_session_manager)) -> SessionResponseStatus:
     await manager.remove_client(name=name)
     return SessionResponseStatus(status=True, message="Session successful removed!")
+
+@router.put("/change")
+async def remove_exist_session(name: str,
+                               active: bool | None = None,
+                               proxy: str | None = Query(None, description="send 'null' to delete proxy"),
+                               manager: TRSManager = Depends(context.get_session_manager)) -> FullSessionInfo:
+    client = await manager.get_client(name)
+    if active is not None and not active:
+        client.session.deactivate()
+    elif active:
+        client.session.activate()
+    if proxy is not None:
+        proxy = None if proxy == "null" else proxy
+        client.session.set_proxy(proxy)
+    if proxy:
+        client.set_proxy(proxy)
+    return await get_session(name=name, manager=manager)
