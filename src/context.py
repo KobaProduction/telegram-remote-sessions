@@ -10,8 +10,8 @@ class Context:
     def get_session_manager(self) -> TRSManager:
         return self.session_manager
 
-    def get_client(self, session_name: str = "test") -> TRSBackendClient:
-        return self.session_manager.get_client(session_name)
+    async def get_client(self, session_name: str) -> TRSBackendClient:
+        return await self.session_manager.get_client(session_name)
 
 
 context = Context()
