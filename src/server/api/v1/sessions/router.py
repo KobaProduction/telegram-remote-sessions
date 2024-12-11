@@ -2,7 +2,7 @@ from inspect import getmembers
 
 from fastapi import APIRouter, Depends, Query
 
-from context import context
+from server.context import context
 from trs import TRSManager, TRSessionParameters
 from trs.sessions import TRSessionState
 
@@ -72,7 +72,10 @@ async def send_auth_code(name: str,
     client = await manager.get_client(name)
     if not client.is_connected():
         await client.connect()
-    result = await client.send_code_request(phone=phone)
+    try:
+        result = await client.send_code_request(phone=phone)
+    finally:
+        await client.disconnect()
     return SessionAuthCodeHash(phone=phone, hash=result.phone_code_hash)
 
 @router.get("/session/auth")
@@ -85,5 +88,8 @@ async def confirm_auth(name: str,
     client = await manager.get_client(name)
     if not client.is_connected():
         await client.connect()
-    user = await client.sign_in(phone=phone, code=code, password=password, phone_code_hash=phone_code_hash)
+    try:
+        user = await client.sign_in(phone=phone, code=code, password=password, phone_code_hash=phone_code_hash)
+    finally:
+        await client.disconnect()
     return SessionAuthUser(id=user.id, first_name=user.first_name, last_name=user.last_name, username=user.username)
