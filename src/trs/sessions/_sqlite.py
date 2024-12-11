@@ -80,10 +80,10 @@ class SQLiteTRSession(SQLiteSession):
             proxy = Proxy.from_str(proxy)
         if isinstance(proxy, Proxy):
             proxy = proxy.as_url
+        self._proxy = proxy
         if proxy is None:
             proxy = ""
         self._set_session_parameter(parameter="proxy", value=f"'{proxy}'")
-        self._proxy = proxy
 
     @property
     def state(self) -> TRSessionState:
