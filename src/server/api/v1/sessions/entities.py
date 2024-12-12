@@ -6,10 +6,7 @@ from pydantic import BaseModel
 from trs import TRSessionParameters
 
 
-class SessionName(BaseModel):
-    name: str
-
-class FullSessionInfo(SessionName):
+class FullSessionInfo(BaseModel):
     is_active: bool
     is_authenticated: bool
     is_broken: bool
@@ -17,17 +14,19 @@ class FullSessionInfo(SessionName):
     session_parameters: TRSessionParameters
 
 
-
 class SessionList(BaseModel):
     sessions: typing.List[str]
+
 
 class SessionResponseStatus(BaseModel):
     status: bool
     message: str
 
+
 class SessionAuthCodeHash(BaseModel):
     phone: str
     hash: str
+
 
 class SessionAuthUser(BaseModel):
     id: int

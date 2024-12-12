@@ -26,7 +26,6 @@ async def read_all_sessions(active: bool | None = Query(None, description="Accou
 async def read_session(name: str, manager: TRSManager = Depends(context.get_session_manager)) -> FullSessionInfo:
     client = await manager.get_client(name)
     return FullSessionInfo(
-        name=name,
         is_active=client.session.active,
         is_broken=client.session.state == TRSessionState.BROKEN,
         is_authenticated=client.session.state == TRSessionState.AUTHENTICATED,
