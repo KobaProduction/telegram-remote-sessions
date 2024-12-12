@@ -6,7 +6,7 @@ from fastapi.responses import Response, JSONResponse
 from fastapi.requests import Request
 from telethon.errors import RPCError
 
-from server.context import context
+from server import context
 from trs import TRSBackendClient, convert_to_pre_json, convert_from_pre_json, convert_objects_from_dict, TRSManager
 from trs.errors import SessionNotExits
 from trs.sessions import TRSessionState

@@ -2,7 +2,7 @@ from inspect import getmembers
 
 from fastapi import APIRouter, Depends, Query
 
-from server.context import context
+from server import context
 from trs import TRSManager, TRSessionParameters
 from trs.sessions import TRSessionState
 
