@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
+from fastapi.websockets import WebSocket
 
 from .sessions import sessions_router
 from .telethon_methods import router as telethon_methods_router
@@ -11,11 +12,18 @@ api_v1.include_router(sessions_router)
 api_v1.include_router(trs_methods_router)
 api_v1.include_router(telethon_methods_router)
 
+
 class ServerStatus(BaseModel):
     status: bool
     version: str
     server_name: str
 
+
 @api_v1.get("/status")
 async def get_status() -> ServerStatus:
     return ServerStatus(status=True, version=SERVER_VERSION, server_name=SERVER_NAME)
+
+
+@api_v1.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
